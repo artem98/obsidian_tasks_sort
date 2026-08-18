@@ -13,12 +13,35 @@ emoji (⏫ 🔼 🔽) and/or due date (📅 YYYY-MM-DD), triggered by a command/
 unlike the Tasks plugin, which only sorts virtually inside a query block.
 
 ## Scope (v1 — keep it small)
-- One command: "Sort tasks in current file"
-- Sorts only a single contiguous checklist block (the one under/around the cursor,
-  or the whole file — pick ONE for v1, whole file is simpler)
-- Sort key: priority first (⏫ > 🔼 > none > 🔽), then due date ascending
-- Preserves indented sub-items attached to their parent line
-- Ignores non-checklist lines (leaves everything else untouched)
+- One command: "Sort task block at cursor"
+- Bind it to a hotkey via Obsidian's Hotkeys settings (do not hardcode a hotkey
+  in the plugin — just register the command)
+- Operates ONLY on the contiguous checklist block surrounding the cursor:
+  1. Get cursor line via `editor.getCursor().line`
+  2. Walk upward from the cursor line while lines match the checklist regex
+     (see below) or are indented continuations (sub-items) of one — stop at
+     the first line that is blank or doesn't match
+  3. Walk downward the same way
+  4. The block = all lines from the first match to the last match (inclusive)
+  5. If the cursor line itself is not a checklist line, do nothing and show
+     a small notice ("No task list found at cursor") via `new Notice(...)`
+- Checklist line regex: `/^(\s*)-\s\[.\]\s.*/` — top-level items only for
+  sorting purposes; a line is a "sub-item" of the item above it if its
+  indentation is greater than that item's indentation
+- Sort key, in order:
+  1. Priority: ⏫ before 🔼 before (no priority) before 🔽
+  2. Due date (📅 YYYY-MM-DD) ascending; tasks with no due date sort after
+     tasks that have one, within the same priority tier
+- Sorting must be STABLE for ties (equal priority + equal/no due date keeps
+  original relative order)
+- When an item is moved, its indented sub-items move with it as a unit
+- Rewrite only those lines back into the editor at the same range
+  (`editor.replaceRange(newText, {line: startLine, ch: 0}, {line: endLine, ch: ...})`) —
+  do not touch the rest of the file
+- Ignore `- [x]` (done) tasks: leave them in place, do not reorder them
+  relative to each other or move them — for v1, simplest correct behavior is
+  to exclude done tasks from the sort entirely (treat a `- [x]` line as a
+  block boundary, same as a blank line)
 
 ## Explicitly OUT of scope for v1
 - Settings UI / configurable sort order
@@ -53,8 +76,24 @@ unlike the Tasks plugin, which only sorts virtually inside a query block.
 
 ## Testing Approach
 - Manual testing in a scratch vault with sample checklists first
-- Test edge cases: nested sub-tasks, tasks with no priority/date mixed in,
-  already-done tasks (`- [x]`) — decide whether v1 touches these or skips them
+- Test cases to verify explicitly:
+  1. Simple flat list, mixed priorities, no dates — sorts by priority only
+  2. Same priority, different due dates — sorts by date within tier
+  3. Mixed priority + dates together — priority wins, date breaks ties
+  4. A task with sub-items (indented lines below it) — sub-items travel
+     with their parent
+  5. A `- [x]` done task inside the block — stays in place, doesn't get
+     reordered, and correctly splits the block if it sits in the middle
+  6. Cursor NOT on a checklist line — shows notice, does nothing, no crash
+  7. Block of exactly one task — no-op, no crash
+  8. Two separate checklist blocks in the same file, cursor in the second
+     one — only that block changes, the first is untouched
+
+## Definition of Done for v1
+- Command appears in command palette as "Sort task block at cursor"
+- Can be bound to a hotkey in Settings → Hotkeys
+- All 8 test cases above pass manually in a scratch vault
+- No console errors on any of the test cases
 
 ## Git Workflow
 - Commit after: sample template cloned + builds, basic parsing works,
