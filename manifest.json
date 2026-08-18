@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"minAppVersion": "1.0.0",
 	"description": "Physically reorders checklist tasks in a note by priority and due date.",
-	"author": "artem",
+	"author": "artem98",
 	"authorUrl": "https://github.com/artem98",
 	"isDesktopOnly": false
 }
