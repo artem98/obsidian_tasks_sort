@@ -10,6 +10,7 @@ export default defineConfig(
 		'version-bump.mjs',
 		'versions.json',
 		'main.js',
+		'.test-build',
 		'package.json',
 		'package-lock.json',
 		'tsconfig.json',
@@ -29,4 +30,17 @@ export default defineConfig(
 		},
 	},
 	...obsidianmd.configs.recommended,
+	{
+		// Tests run in Node with the built-in test runner, not inside Obsidian.
+		files: ['tests/**/*.ts'],
+		languageOptions: {
+			globals: {
+				...globals.node,
+			},
+		},
+		rules: {
+			'@typescript-eslint/no-floating-promises': 'off',
+			'obsidianmd/no-nodejs-modules': 'off',
+		},
+	},
 );

@@ -43,9 +43,9 @@ Indented lines below a task — notes, links, nested checkboxes — move togethe
 with it as one unit.
 
 ### Finished tasks sink to the bottom
-`- [x]` (and any other status marker) is moved below the unfinished tasks
-without breaking the list in two. Done tasks keep their order relative to each
-other.
+`- [x]` is moved below the unfinished tasks without breaking the list in two,
+and done tasks keep their order relative to each other. Other status markers,
+`- [/]` in progress among them, are sorted as ordinary active tasks.
 
 ## Installation
 
@@ -78,6 +78,7 @@ npm install
 npm run dev    # watch build
 npm run build  # type-check + production bundle
 npm run lint
+npm test       # unit tests for the sorting logic
 ```
 
 Copy `main.js` and `manifest.json` into

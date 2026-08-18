@@ -8,7 +8,8 @@
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"test": "esbuild tests/*.test.ts --bundle --platform=node --format=esm --outdir=.test-build --log-level=error && node --test .test-build"
 	},
 	"keywords": [],
 	"license": "MIT",

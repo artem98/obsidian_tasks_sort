@@ -30,7 +30,8 @@ unlike the Tasks plugin, which only sorts virtually inside a query block.
   sorting purposes; a line is a "sub-item" of the item above it if its
   indentation is greater than that item's indentation
 - Sort key, in order:
-  1. Done (`- [x]`, or any non-space status marker) always last
+  1. Done (`- [x]`) always last; other status markers such as `- [/]`
+     (in progress) are sorted as ordinary active tasks
   2. Priority: 🔺 before ⏫ before 🔼 before (no priority) before 🔽 before ⏬
   3. Due date (📅 YYYY-MM-DD) ascending; tasks with no due date sort after
      tasks that have one, within the same priority tier
@@ -76,7 +77,9 @@ unlike the Tasks plugin, which only sorts virtually inside a query block.
    first if loading unpacked, or just drop files in and reload)
 
 ## Testing Approach
-- Manual testing in a scratch vault with sample checklists first
+- Unit tests for the pure sorting logic in `tests/`, run with `npm test`
+  (esbuild + the built-in Node test runner, no extra dependencies)
+- Manual testing in a scratch vault with sample checklists on top of that
 - Test cases to verify explicitly:
   1. Simple flat list, mixed priorities, no dates — sorts by priority only
   2. Same priority, different due dates — sorts by date within tier

@@ -46,10 +46,13 @@ function isTaskAt(lines: string[], index: number, indent: number): boolean {
 	return task !== null && task.indent === indent;
 }
 
-/** Anything but `- [ ]` counts as done and sinks to the bottom of the block. */
+/**
+ * Only `- [x]` counts as done and sinks to the bottom; other status markers
+ * (`- [/]` in progress and friends) stay among the active tasks.
+ */
 function isDone(line: string): boolean {
 	const task = matchTask(line);
-	return task !== null && task.marker !== ' ';
+	return task !== null && task.marker.toLowerCase() === 'x';
 }
 
 /** Any non-blank line indented deeper than the items belongs to the one above it. */
