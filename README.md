@@ -14,9 +14,8 @@ uses, so both plugins work on the same notes.
 ## Features
 
 ### Sorts only the block you are standing in
-The contiguous run of `- [ ]` items around the cursor is sorted; a blank line, a
-finished task or any other line ends the block. The rest of the note is never
-touched.
+The contiguous run of checklist items around the cursor is sorted; a blank line
+or any other line ends the block. The rest of the note is never touched.
 
 ### Priority first, due date second
 🔺 → ⏫ → 🔼 → no priority → 🔽 → ⏬, then 📅 `YYYY-MM-DD` ascending within each
@@ -43,10 +42,10 @@ becomes
 Indented lines below a task — notes, links, nested checkboxes — move together
 with it as one unit.
 
-### Finished tasks stay put
-`- [x]` (and any other status marker) is treated as a block boundary, so done
-tasks are never reordered and the list above and below them is sorted
-separately.
+### Finished tasks sink to the bottom
+`- [x]` (and any other status marker) is moved below the unfinished tasks
+without breaking the list in two. Done tasks keep their order relative to each
+other.
 
 ## Installation
 
@@ -64,7 +63,7 @@ Install via [BRAT](https://obsidian.md/plugins?id=obsidian42-brat):
 
 Put the cursor on a task and either right-click and choose
 **Sort task block at cursor**, or run the same command from the command palette.
-The menu entry only shows up when the cursor is on an unfinished task.
+The menu entry only shows up when the cursor is on a task.
 
 ### Configure Obsidian hotkeys
 1. Open Obsidian Settings

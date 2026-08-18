@@ -20,6 +20,7 @@ export interface SortedBlock {
 
 interface TaskItem {
 	lines: string[];
+	done: boolean;
 	priority: number;
 	dueDate: string | null;
 }
@@ -39,10 +40,16 @@ function matchTask(line: string): { indent: number; marker: string } | null {
 	return { indent: indent.length, marker };
 }
 
-/** Only `- [ ]` is sortable; `- [x]` and other statuses bound the block. */
-function isOpenTaskAt(lines: string[], index: number, indent: number): boolean {
+/** A task of the block being sorted: same indentation, any status marker. */
+function isTaskAt(lines: string[], index: number, indent: number): boolean {
 	const task = matchTask(lineAt(lines, index));
-	return task !== null && task.indent === indent && task.marker === ' ';
+	return task !== null && task.indent === indent;
+}
+
+/** Anything but `- [ ]` counts as done and sinks to the bottom of the block. */
+function isDone(line: string): boolean {
+	const task = matchTask(line);
+	return task !== null && task.marker !== ' ';
 }
 
 /** Any non-blank line indented deeper than the items belongs to the one above it. */
@@ -71,25 +78,26 @@ function compareDueDates(a: string | null, b: string | null): number {
 
 /**
  * Sorts the contiguous checklist block surrounding `cursorLine` by priority,
- * then by due date. Returns null when the cursor is not on an open task.
+ * then by due date, with done tasks pushed to the bottom. Returns null when the
+ * cursor is not on a task.
  */
 export function sortTaskBlock(
 	lines: string[],
 	cursorLine: number,
 ): SortedBlock | null {
 	const cursorTask = matchTask(lineAt(lines, cursorLine));
-	if (cursorTask === null || cursorTask.marker !== ' ') return null;
+	if (cursorTask === null) return null;
 	const indent = cursorTask.indent;
 
 	let start = cursorLine;
 	for (let i = cursorLine - 1; i >= 0; i--) {
-		if (isOpenTaskAt(lines, i, indent)) start = i;
+		if (isTaskAt(lines, i, indent)) start = i;
 		else if (!isSubLineAt(lines, i, indent)) break;
 	}
 
 	let end = cursorLine;
 	for (let i = cursorLine + 1; i < lines.length; i++) {
-		if (!isOpenTaskAt(lines, i, indent) && !isSubLineAt(lines, i, indent)) break;
+		if (!isTaskAt(lines, i, indent) && !isSubLineAt(lines, i, indent)) break;
 		end = i;
 	}
 
@@ -97,9 +105,10 @@ export function sortTaskBlock(
 	let current: TaskItem | null = null;
 	for (let i = start; i <= end; i++) {
 		const line = lineAt(lines, i);
-		if (current === null || isOpenTaskAt(lines, i, indent)) {
+		if (current === null || isTaskAt(lines, i, indent)) {
 			current = {
 				lines: [line],
+				done: isDone(line),
 				priority: priorityOf(line),
 				dueDate: dueDateOf(line),
 			};
@@ -110,10 +119,12 @@ export function sortTaskBlock(
 		}
 	}
 
-	// Array.prototype.sort is stable, so ties keep their original order.
-	items.sort(
-		(a, b) => a.priority - b.priority || compareDueDates(a.dueDate, b.dueDate),
-	);
+	// Array.prototype.sort is stable, so ties — done tasks included — keep their
+	// original order.
+	items.sort((a, b) => {
+		if (a.done || b.done) return Number(a.done) - Number(b.done);
+		return a.priority - b.priority || compareDueDates(a.dueDate, b.dueDate);
+	});
 
 	return { start, end, lines: items.flatMap((item) => item.lines) };
 }

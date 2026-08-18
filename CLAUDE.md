@@ -24,13 +24,15 @@ unlike the Tasks plugin, which only sorts virtually inside a query block.
   3. Walk downward the same way
   4. The block = all lines from the first match to the last match (inclusive)
   5. If the cursor line itself is not a checklist line, do nothing and show
-     a small notice ("No task list found at cursor") via `new Notice(...)`
+     a small notice ("No task list found at cursor") via `new Notice(...)`;
+     a done task under the cursor is a valid starting point
 - Checklist line regex: `/^(\s*)-\s\[.\]\s.*/` — top-level items only for
   sorting purposes; a line is a "sub-item" of the item above it if its
   indentation is greater than that item's indentation
 - Sort key, in order:
-  1. Priority: ⏫ before 🔼 before (no priority) before 🔽
-  2. Due date (📅 YYYY-MM-DD) ascending; tasks with no due date sort after
+  1. Done (`- [x]`, or any non-space status marker) always last
+  2. Priority: 🔺 before ⏫ before 🔼 before (no priority) before 🔽 before ⏬
+  3. Due date (📅 YYYY-MM-DD) ascending; tasks with no due date sort after
      tasks that have one, within the same priority tier
 - Sorting must be STABLE for ties (equal priority + equal/no due date keeps
   original relative order)
@@ -38,10 +40,9 @@ unlike the Tasks plugin, which only sorts virtually inside a query block.
 - Rewrite only those lines back into the editor at the same range
   (`editor.replaceRange(newText, {line: startLine, ch: 0}, {line: endLine, ch: ...})`) —
   do not touch the rest of the file
-- Ignore `- [x]` (done) tasks: leave them in place, do not reorder them
-  relative to each other or move them — for v1, simplest correct behavior is
-  to exclude done tasks from the sort entirely (treat a `- [x]` line as a
-  block boundary, same as a blank line)
+- Done tasks (`- [x]`) belong to the block and do not split it: they are moved
+  below every unfinished task, keeping their original order relative to each
+  other
 
 ## Explicitly OUT of scope for v1
 - Settings UI / configurable sort order
@@ -82,8 +83,8 @@ unlike the Tasks plugin, which only sorts virtually inside a query block.
   3. Mixed priority + dates together — priority wins, date breaks ties
   4. A task with sub-items (indented lines below it) — sub-items travel
      with their parent
-  5. A `- [x]` done task inside the block — stays in place, doesn't get
-     reordered, and correctly splits the block if it sits in the middle
+  5. A `- [x]` done task inside the block — moves below the unfinished tasks
+     and does not split the block
   6. Cursor NOT on a checklist line — shows notice, does nothing, no crash
   7. Block of exactly one task — no-op, no crash
   8. Two separate checklist blocks in the same file, cursor in the second
