@@ -1,0 +1,9 @@
+{
+	"id": "task-sorter",
+	"name": "Task Sorter",
+	"version": "1.0.0",
+	"minAppVersion": "1.0.0",
+	"description": "Physically reorders checklist tasks in a note by priority and due date.",
+	"author": "artem",
+	"isDesktopOnly": false
+}
