@@ -3,7 +3,7 @@
 	"name": "Task Sorter",
 	"version": "1.0.0",
 	"minAppVersion": "1.0.0",
-	"description": "Physically reorders checklist tasks in a note by priority and due date.",
+	"description": "Task sorter for checklists: sorts tasks by priority level and due date, physically reordering the checkboxes in your note.",
 	"author": "artem98",
 	"authorUrl": "https://github.com/artem98",
 	"isDesktopOnly": false

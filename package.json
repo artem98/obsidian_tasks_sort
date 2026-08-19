@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-task-sorter",
 	"version": "1.0.0",
-	"description": "Obsidian plugin that physically sorts checklist tasks by priority and due date",
+	"description": "Task sorter for checklists: sorts tasks by priority level and due date, physically reordering the checkboxes in your note.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
