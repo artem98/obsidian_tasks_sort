@@ -42,10 +42,13 @@ becomes
 Indented lines below a task — notes, links, nested checkboxes — move together
 with it as one unit.
 
-### Finished tasks sink to the bottom
-`- [x]` is moved below the unfinished tasks without breaking the list in two,
-and done tasks keep their order relative to each other. Other status markers,
-`- [/]` in progress among them, are sorted as ordinary active tasks.
+### Finished and in-progress tasks go where you want them
+For `- [x]` and `- [/]` you pick one of three behaviours in the plugin settings:
+sort them together with everything else, pin them to the top of the block, or
+pin them to the bottom. Out of the box `- [x]` goes to the bottom and `- [/]` is
+sorted along with the active tasks. Pinned tasks keep their order relative to
+each other and never break the list in two; any other status marker is always
+sorted as an ordinary active task.
 
 ## Installation
 

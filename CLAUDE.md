@@ -13,6 +13,7 @@ emoji (⏫ 🔼 🔽) and/or due date (📅 YYYY-MM-DD), triggered by a command/
 unlike the Tasks plugin, which only sorts virtually inside a query block.
 
 ## Scope (v1 — keep it small)
+Shipped as 1.0.0 and published in the community directory.
 - One command: "Sort task block at cursor"
 - Bind it to a hotkey via Obsidian's Hotkeys settings (do not hardcode a hotkey
   in the plugin — just register the command)
@@ -30,8 +31,8 @@ unlike the Tasks plugin, which only sorts virtually inside a query block.
   sorting purposes; a line is a "sub-item" of the item above it if its
   indentation is greater than that item's indentation
 - Sort key, in order:
-  1. Done (`- [x]`) always last; other status markers such as `- [/]`
-     (in progress) are sorted as ordinary active tasks
+  1. Placement of done (`- [x]`) and in-progress (`- [/]`) tasks, see v2
+     below; other status markers are always sorted as ordinary active tasks
   2. Priority: 🔺 before ⏫ before 🔼 before (no priority) before 🔽 before ⏬
   3. Due date (📅 YYYY-MM-DD) ascending; tasks with no due date sort after
      tasks that have one, within the same priority tier
@@ -41,12 +42,18 @@ unlike the Tasks plugin, which only sorts virtually inside a query block.
 - Rewrite only those lines back into the editor at the same range
   (`editor.replaceRange(newText, {line: startLine, ch: 0}, {line: endLine, ch: ...})`) —
   do not touch the rest of the file
-- Done tasks (`- [x]`) belong to the block and do not split it: they are moved
-  below every unfinished task, keeping their original order relative to each
-  other
+- Done tasks (`- [x]`) belong to the block and do not split it
 
-## Explicitly OUT of scope for v1
-- Settings UI / configurable sort order
+## Scope (v2)
+- Settings tab with one dropdown per group — done (`- [x]`) and in progress
+  (`- [/]`) — each choosing between "Sort with the others", "Move to top" and
+  "Move to bottom"
+- Defaults keep the v1 behaviour: done to the bottom, in progress sorted along
+  with the active tasks
+- Pinned groups are not sorted internally: they keep their original relative
+  order and carry their sub-items
+
+## Explicitly OUT of scope
 - Multiple sort profiles
 - Auto-sort on every edit (v1 is manual trigger only, via command palette/hotkey)
 - Cross-file sorting

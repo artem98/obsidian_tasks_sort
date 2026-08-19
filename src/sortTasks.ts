@@ -12,15 +12,33 @@ const PRIORITY_RANK: Record<string, number> = {
 };
 const NO_PRIORITY_RANK = 3;
 
+/** Where a group of tasks ends up when the block is sorted. */
+export type TaskPlacement = 'sort' | 'top' | 'bottom';
+
+export interface TaskSorterSettings {
+	donePlacement: TaskPlacement;
+	inProgressPlacement: TaskPlacement;
+}
+
+export const DEFAULT_SETTINGS: TaskSorterSettings = {
+	donePlacement: 'bottom',
+	inProgressPlacement: 'sort',
+};
+
 export interface SortedBlock {
 	start: number;
 	end: number;
 	lines: string[];
 }
 
+/** Placement buckets, in the order they end up in the note. */
+const TOP = 0;
+const SORTED = 1;
+const BOTTOM = 2;
+
 interface TaskItem {
 	lines: string[];
-	done: boolean;
+	bucket: number;
 	priority: number;
 	dueDate: string | null;
 }
@@ -47,12 +65,20 @@ function isTaskAt(lines: string[], index: number, indent: number): boolean {
 }
 
 /**
- * Only `- [x]` counts as done and sinks to the bottom; other status markers
- * (`- [/]` in progress and friends) stay among the active tasks.
+ * `- [x]` is done and `- [/]` is in progress; every other status marker is an
+ * ordinary active task.
  */
-function isDone(line: string): boolean {
+function bucketOf(line: string, settings: TaskSorterSettings): number {
 	const task = matchTask(line);
-	return task !== null && task.marker.toLowerCase() === 'x';
+	if (task === null) return SORTED;
+
+	let placement: TaskPlacement = 'sort';
+	if (task.marker.toLowerCase() === 'x') placement = settings.donePlacement;
+	else if (task.marker === '/') placement = settings.inProgressPlacement;
+
+	if (placement === 'top') return TOP;
+	if (placement === 'bottom') return BOTTOM;
+	return SORTED;
 }
 
 /** Any non-blank line indented deeper than the items belongs to the one above it. */
@@ -81,12 +107,13 @@ function compareDueDates(a: string | null, b: string | null): number {
 
 /**
  * Sorts the contiguous checklist block surrounding `cursorLine` by priority,
- * then by due date, with done tasks pushed to the bottom. Returns null when the
- * cursor is not on a task.
+ * then by due date. Done and in-progress tasks can be pinned to the top or the
+ * bottom of the block instead. Returns null when the cursor is not on a task.
  */
 export function sortTaskBlock(
 	lines: string[],
 	cursorLine: number,
+	settings: TaskSorterSettings = DEFAULT_SETTINGS,
 ): SortedBlock | null {
 	const cursorTask = matchTask(lineAt(lines, cursorLine));
 	if (cursorTask === null) return null;
@@ -111,7 +138,7 @@ export function sortTaskBlock(
 		if (current === null || isTaskAt(lines, i, indent)) {
 			current = {
 				lines: [line],
-				done: isDone(line),
+				bucket: bucketOf(line, settings),
 				priority: priorityOf(line),
 				dueDate: dueDateOf(line),
 			};
@@ -122,10 +149,11 @@ export function sortTaskBlock(
 		}
 	}
 
-	// Array.prototype.sort is stable, so ties — done tasks included — keep their
-	// original order.
+	// Array.prototype.sort is stable, so ties — and the pinned buckets, which are
+	// not sorted at all — keep their original order.
 	items.sort((a, b) => {
-		if (a.done || b.done) return Number(a.done) - Number(b.done);
+		if (a.bucket !== b.bucket) return a.bucket - b.bucket;
+		if (a.bucket !== SORTED) return 0;
 		return a.priority - b.priority || compareDueDates(a.dueDate, b.dueDate);
 	});
 

@@ -1,11 +1,19 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { sortTaskBlock } from '../src/sortTasks';
+import {
+	DEFAULT_SETTINGS,
+	sortTaskBlock,
+	TaskSorterSettings,
+} from '../src/sortTasks';
 
 /** Sorts the block at `cursor` and returns the whole text back. */
-function sort(text: string, cursor: number): string | null {
+function sort(
+	text: string,
+	cursor: number,
+	settings: Partial<TaskSorterSettings> = {},
+): string | null {
 	const lines = text.split('\n');
-	const block = sortTaskBlock(lines, cursor);
+	const block = sortTaskBlock(lines, cursor, { ...DEFAULT_SETTINGS, ...settings });
 	if (block === null) return null;
 	return [
 		...lines.slice(0, block.start),
@@ -123,6 +131,63 @@ describe('other status markers', () => {
 		assert.equal(
 			sort('- [ ] plain\n- [x] done\n- [/] wip ⏫', 0),
 			'- [/] wip ⏫\n- [ ] plain\n- [x] done',
+		);
+	});
+});
+
+describe('placement settings', () => {
+	const list = '- [x] done\n- [ ] b 🔽\n- [/] wip\n- [ ] a ⏫';
+
+	test('defaults keep done at the bottom and in progress in the sort', () => {
+		assert.equal(
+			sort(list, 1),
+			'- [ ] a ⏫\n- [/] wip\n- [ ] b 🔽\n- [x] done',
+		);
+	});
+
+	test('done tasks can be pinned to the top', () => {
+		assert.equal(
+			sort(list, 1, { donePlacement: 'top' }),
+			'- [x] done\n- [ ] a ⏫\n- [/] wip\n- [ ] b 🔽',
+		);
+	});
+
+	test('done tasks can join the sort', () => {
+		assert.equal(
+			sort(list, 1, { donePlacement: 'sort' }),
+			'- [ ] a ⏫\n- [x] done\n- [/] wip\n- [ ] b 🔽',
+		);
+	});
+
+	test('in-progress tasks can be pinned to the top', () => {
+		assert.equal(
+			sort(list, 1, { inProgressPlacement: 'top' }),
+			'- [/] wip\n- [ ] a ⏫\n- [ ] b 🔽\n- [x] done',
+		);
+	});
+
+	test('in-progress tasks can be pinned to the bottom', () => {
+		assert.equal(
+			sort(list, 1, { inProgressPlacement: 'bottom' }),
+			'- [ ] a ⏫\n- [ ] b 🔽\n- [x] done\n- [/] wip',
+		);
+	});
+
+	test('both groups can be pinned to opposite ends', () => {
+		assert.equal(
+			sort(list, 1, { donePlacement: 'top', inProgressPlacement: 'bottom' }),
+			'- [x] done\n- [ ] a ⏫\n- [ ] b 🔽\n- [/] wip',
+		);
+	});
+
+	test('pinned groups keep their own order and their sub-items', () => {
+		assert.equal(
+			sort(
+				'- [x] first\n\tnote\n- [ ] a ⏫\n- [x] second',
+				2,
+				{ donePlacement: 'top' },
+			),
+			'- [x] first\n\tnote\n- [x] second\n- [ ] a ⏫',
 		);
 	});
 });
