@@ -1,7 +1,7 @@
 {
 	"id": "task-sorter",
 	"name": "Task Sorter",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"minAppVersion": "1.0.0",
 	"description": "Task sorter for checklists: sorts tasks by priority level and due date, physically reordering the checkboxes in your note.",
 	"author": "artem98",
