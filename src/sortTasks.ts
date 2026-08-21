@@ -72,16 +72,18 @@ function isTaskAt(lines: string[], index: number, indent: number): boolean {
 }
 
 /**
- * A task with no text is empty whatever its marker; otherwise `- [x]` is done
- * and `- [/]` is in progress, and every other status marker is an ordinary
- * active task.
+ * An unfinished task with no text is empty — the placeholder Obsidian leaves
+ * when you start a new item. Otherwise `- [x]` is done and `- [/]` is in
+ * progress, and every other status marker is an ordinary active task.
  */
 function bucketOf(line: string, settings: TaskSorterSettings): number {
 	const task = matchTask(line);
 	if (task === null) return SORTED;
 
 	let placement: TaskPlacement = 'sort';
-	if (task.text.trim() === '') placement = settings.emptyPlacement;
+	if (task.marker === ' ' && task.text.trim() === '') {
+		placement = settings.emptyPlacement;
+	}
 	else if (task.marker.toLowerCase() === 'x') placement = settings.donePlacement;
 	else if (task.marker === '/') placement = settings.inProgressPlacement;
 

@@ -227,11 +227,21 @@ describe('empty tasks', () => {
 		);
 	});
 
-	test('the empty setting wins over the done setting', () => {
+	test('only unfinished tasks count as empty', () => {
 		assert.equal(
 			sort('- [ ] a ⏫\n- [x]', 0, {
 				emptyPlacement: 'top',
 				donePlacement: 'bottom',
+			}),
+			'- [ ] a ⏫\n- [x]',
+		);
+	});
+
+	test('an empty done task follows the done setting', () => {
+		assert.equal(
+			sort('- [ ] a ⏫\n- [x]', 0, {
+				emptyPlacement: 'bottom',
+				donePlacement: 'top',
 			}),
 			'- [x]\n- [ ] a ⏫',
 		);

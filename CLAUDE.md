@@ -48,10 +48,11 @@ Shipped as 1.0.0 and published in the community directory.
 
 ## Scope (v2)
 - Settings tab with one dropdown per group — done (`- [x]`), in progress
-  (`- [/]`) and empty (a task with no text, with or without a trailing space) —
-  each choosing between "Sort with the others", "Move to top" and "Move to
-  bottom"
-- An empty task follows the empty setting whatever its status marker
+  (`- [/]`) and empty (an unfinished task with no text, with or without a
+  trailing space) — each choosing between "Sort with the others", "Move to top"
+  and "Move to bottom"
+- Empty only applies to `- [ ]`; `- [x]` with no text follows the done setting,
+  the point of the group is that a freshly created item lands at the end
 - Defaults: done and empty to the bottom, in progress sorted along with the
   active tasks
 - Pinned groups are not sorted internally: they keep their original relative

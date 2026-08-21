@@ -43,8 +43,8 @@ Indented lines below a task — notes, links, nested checkboxes — move togethe
 with it as one unit.
 
 ### Special tasks go where you want them
-For finished tasks (`- [x]`), in-progress ones (`- [/]`) and empty ones — a bare
-`- [ ]` with no text yet — you pick one of three behaviours in the plugin
+For finished tasks (`- [x]`), in-progress ones (`- [/]`) and empty ones — an
+unfinished `- [ ]` with no text yet — you pick one of three behaviours in the plugin
 settings: sort them together with everything else, pin them to the top of the
 block, or pin them to the bottom. Out of the box finished and empty tasks go to
 the bottom, while in-progress ones are sorted along with the active tasks.
