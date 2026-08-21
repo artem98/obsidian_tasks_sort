@@ -34,6 +34,19 @@ export class TaskSorterSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
+			.setName('Empty tasks')
+			.setDesc('Where tasks with no text end up when a block is sorted.')
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions(PLACEMENT_OPTIONS)
+					.setValue(this.plugin.settings.emptyPlacement)
+					.onChange(async (value) => {
+						this.plugin.settings.emptyPlacement = value as TaskPlacement;
+						await this.plugin.saveSettings();
+					}),
+			);
+
+		new Setting(containerEl)
 			.setName('In-progress tasks')
 			.setDesc('Where "- [/]" tasks end up when a block is sorted.')
 			.addDropdown((dropdown) =>

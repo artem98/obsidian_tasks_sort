@@ -1,5 +1,8 @@
-/** `- [ ] text`, capturing indentation and the status marker. */
-const CHECKLIST_RE = /^(\s*)-\s\[(.)\]\s.*/;
+/**
+ * `- [ ] text`, capturing indentation, the status marker and the text. The text
+ * is optional so that a bare `- [ ]` still counts as a task.
+ */
+const CHECKLIST_RE = /^(\s*)-\s\[(.)\](?:\s(.*))?$/;
 const DUE_DATE_RE = /📅\s*(\d{4}-\d{2}-\d{2})/;
 /** 🔺 before ⏫ before 🔼 before no priority before 🔽 before ⏬. */
 const PRIORITY_RE = /[🔺⏫🔼🔽⏬]/u;
@@ -18,11 +21,13 @@ export type TaskPlacement = 'sort' | 'top' | 'bottom';
 export interface TaskSorterSettings {
 	donePlacement: TaskPlacement;
 	inProgressPlacement: TaskPlacement;
+	emptyPlacement: TaskPlacement;
 }
 
 export const DEFAULT_SETTINGS: TaskSorterSettings = {
 	donePlacement: 'bottom',
 	inProgressPlacement: 'sort',
+	emptyPlacement: 'bottom',
 };
 
 export interface SortedBlock {
@@ -51,11 +56,13 @@ function indentOf(line: string): number {
 	return line.length - line.trimStart().length;
 }
 
-function matchTask(line: string): { indent: number; marker: string } | null {
+function matchTask(
+	line: string,
+): { indent: number; marker: string; text: string } | null {
 	const match = CHECKLIST_RE.exec(line);
 	if (match === null) return null;
-	const [, indent = '', marker = ''] = match;
-	return { indent: indent.length, marker };
+	const [, indent = '', marker = '', text = ''] = match;
+	return { indent: indent.length, marker, text };
 }
 
 /** A task of the block being sorted: same indentation, any status marker. */
@@ -65,15 +72,17 @@ function isTaskAt(lines: string[], index: number, indent: number): boolean {
 }
 
 /**
- * `- [x]` is done and `- [/]` is in progress; every other status marker is an
- * ordinary active task.
+ * A task with no text is empty whatever its marker; otherwise `- [x]` is done
+ * and `- [/]` is in progress, and every other status marker is an ordinary
+ * active task.
  */
 function bucketOf(line: string, settings: TaskSorterSettings): number {
 	const task = matchTask(line);
 	if (task === null) return SORTED;
 
 	let placement: TaskPlacement = 'sort';
-	if (task.marker.toLowerCase() === 'x') placement = settings.donePlacement;
+	if (task.text.trim() === '') placement = settings.emptyPlacement;
+	else if (task.marker.toLowerCase() === 'x') placement = settings.donePlacement;
 	else if (task.marker === '/') placement = settings.inProgressPlacement;
 
 	if (placement === 'top') return TOP;

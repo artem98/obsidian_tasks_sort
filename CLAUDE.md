@@ -27,12 +27,14 @@ Shipped as 1.0.0 and published in the community directory.
   5. If the cursor line itself is not a checklist line, do nothing and show
      a small notice ("No task list found at cursor") via `new Notice(...)`;
      a done task under the cursor is a valid starting point
-- Checklist line regex: `/^(\s*)-\s\[.\]\s.*/` — top-level items only for
+- Checklist line regex: `/^(\s*)-\s\[(.)\](?:\s(.*))?$/` — the text is
+  optional so a bare `- [ ]` is a task and not a block boundary; top-level items
+  only for
   sorting purposes; a line is a "sub-item" of the item above it if its
   indentation is greater than that item's indentation
 - Sort key, in order:
-  1. Placement of done (`- [x]`) and in-progress (`- [/]`) tasks, see v2
-     below; other status markers are always sorted as ordinary active tasks
+  1. Placement of empty, done (`- [x]`) and in-progress (`- [/]`) tasks, see
+     v2 below; other status markers are always sorted as ordinary active tasks
   2. Priority: 🔺 before ⏫ before 🔼 before (no priority) before 🔽 before ⏬
   3. Due date (📅 YYYY-MM-DD) ascending; tasks with no due date sort after
      tasks that have one, within the same priority tier
@@ -45,11 +47,13 @@ Shipped as 1.0.0 and published in the community directory.
 - Done tasks (`- [x]`) belong to the block and do not split it
 
 ## Scope (v2)
-- Settings tab with one dropdown per group — done (`- [x]`) and in progress
-  (`- [/]`) — each choosing between "Sort with the others", "Move to top" and
-  "Move to bottom"
-- Defaults keep the v1 behaviour: done to the bottom, in progress sorted along
-  with the active tasks
+- Settings tab with one dropdown per group — done (`- [x]`), in progress
+  (`- [/]`) and empty (a task with no text, with or without a trailing space) —
+  each choosing between "Sort with the others", "Move to top" and "Move to
+  bottom"
+- An empty task follows the empty setting whatever its status marker
+- Defaults: done and empty to the bottom, in progress sorted along with the
+  active tasks
 - Pinned groups are not sorted internally: they keep their original relative
   order and carry their sub-items
 

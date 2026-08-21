@@ -192,6 +192,52 @@ describe('placement settings', () => {
 	});
 });
 
+describe('empty tasks', () => {
+	const list = '- [ ] b 🔽\n- [ ]\n- [ ] a ⏫';
+
+	test('a bare "- [ ]" is a task, not a block boundary', () => {
+		assert.equal(sort(list, 0), '- [ ] a ⏫\n- [ ] b 🔽\n- [ ]');
+	});
+
+	test('a "- [ ] " with a trailing space counts as empty too', () => {
+		assert.equal(
+			sort('- [ ] b 🔽\n- [ ] \n- [ ] a ⏫', 0),
+			'- [ ] a ⏫\n- [ ] b 🔽\n- [ ] ',
+		);
+	});
+
+	test('can be pinned to the top', () => {
+		assert.equal(
+			sort(list, 0, { emptyPlacement: 'top' }),
+			'- [ ]\n- [ ] a ⏫\n- [ ] b 🔽',
+		);
+	});
+
+	test('can join the sort as tasks without a priority', () => {
+		assert.equal(
+			sort(list, 0, { emptyPlacement: 'sort' }),
+			'- [ ] a ⏫\n- [ ]\n- [ ] b 🔽',
+		);
+	});
+
+	test('several empty tasks keep their order and their sub-items', () => {
+		assert.equal(
+			sort('- [ ]\n\tnote\n- [ ] a ⏫\n- [ ]', 2),
+			'- [ ] a ⏫\n- [ ]\n\tnote\n- [ ]',
+		);
+	});
+
+	test('the empty setting wins over the done setting', () => {
+		assert.equal(
+			sort('- [ ] a ⏫\n- [x]', 0, {
+				emptyPlacement: 'top',
+				donePlacement: 'bottom',
+			}),
+			'- [x]\n- [ ] a ⏫',
+		);
+	});
+});
+
 describe('block boundaries', () => {
 	test('only the block around the cursor is touched', () => {
 		assert.equal(
